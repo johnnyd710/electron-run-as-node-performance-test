@@ -16,57 +16,53 @@ const server = net.createServer();
 const socketPath = "\\\\.\\pipe\\electron-ipc-server";
 server.listen(socketPath);
 
-const electronUtilityProcess = new Promise((resolve, reject) => {
+/**
+ * @type { ChildProcessWithoutNullStreams }
+ */
+let child_process;
+
+const resolveOnDone = (server) => new Promise((resolve) => {
   server.on("connection", (socket) => {
     socket.on("data", (data) => {
       if (data.toString() === "done") {
         socket.destroy();
-        childProcess.kill();
         resolve();
       }
     });
   });
-
-  const childProcess = spawn("./node_modules/electron/dist/electron.exe", ["index.js"]);
   setTimeout(() => reject("timeout"), 5_000);
 });
 
-const electronAsNodeProcess = new Promise((resolve, reject) => {
-  server.on("connection", (socket) => {
-    socket.on("data", (data) => {
-      if (data.toString() === "done") {
-        // close connection
-        socket.destroy();
-        childProcess.kill();
-        resolve();
-      }
-    });
-  });
+const afterEach = () => {
+  server.removeAllListeners("connection");
+  child_process?.kill();
+  child_process = undefined;
+}
 
-  const childProcess = spawn("./node_modules/electron/dist/electron.exe", ["backend.js"], {
+const electronUtilityProcess = new Promise((resolve, reject) => {
+  resolveOnDone(server).then(resolve);
+  childProcess = spawn("./node_modules/electron/dist/electron.exe", ["index.js"]);
+});
+
+const electronAsNodeProcess = new Promise((resolve, reject) => {
+  resolveOnDone(server).then(resolve);
+  childProcess = spawn("./node_modules/electron/dist/electron.exe", ["backend.js"], {
     env: {
       ELECTRON_RUN_AS_NODE: 1,
     }
   });
-  setTimeout(() => reject("timeout"), 5_000);
 });
 
 async function main() {
   const electronUtilityProcessMeasurement = await measure(async () => {
     await electronUtilityProcess;
-  }, {
-    afterEach: () => {
-      server.removeAllListeners("connection");
-    }
-  });
+  }, { afterEach }
+);
 
   const electronAsNodeProcessMeasurement = await measure(async () => {
     await electronAsNodeProcess;
-  }, {
-    afterEach: () => {
-      server.removeAllListeners("connection");
-    }
-  });
+  }, { afterEach }
+);
 
   console.log(`Done!`);
   console.log(`electronUtilityProcessMeasurement: ${electronUtilityProcessMeasurement.mean}`);
