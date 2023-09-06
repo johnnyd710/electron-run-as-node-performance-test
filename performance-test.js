@@ -81,7 +81,6 @@ async function main() {
     }]
   }
   console.table(measurementsToTable(electronUtilityProcessMeasurement, electronAsNodeProcessMeasurement));
-  console.log(`electronAsNodeProcessMeasurement: mean ${electronAsNodeProcessMeasurement.mean} ms, std ${electronAsNodeProcessMeasurement.standardDeviation} ms, margin of error ${electronAsNodeProcessMeasurement.marginOfError} ms`);
   process.exit(0);
 }
 
