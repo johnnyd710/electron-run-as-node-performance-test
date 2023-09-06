@@ -65,8 +65,25 @@ async function main() {
 );
 
   console.log(`Done!`);
-  console.log(`electronUtilityProcessMeasurement: ${electronUtilityProcessMeasurement.mean}`);
-  console.log(`electronAsNodeProcessMeasurement: ${electronAsNodeProcessMeasurement.mean}`);
+  const measurementsToTable = (electronUtilityProcess, electronAsNodeProcess) => {
+    return [{
+      "": "electronUtilityProcess",
+      "mean": `${electronUtilityProcess.mean} ms`,
+      "std": `${electronUtilityProcess.standardDeviation} ms`,
+      "margin of error": `${electronUtilityProcess.marginOfError} ms`,
+      "max": `${electronUtilityProcess.max} ms`,
+      "min": `${electronUtilityProcess.min} ms`,
+    }, {
+      "": "electronAsNodeProcess",
+      "mean": `${electronAsNodeProcess.mean} ms`,
+      "std": `${electronAsNodeProcess.standardDeviation} ms`,
+      "margin of error": `${electronAsNodeProcess.marginOfError} ms`,
+      "max": `${electronAsNodeProcess.max} ms`,
+      "min": `${electronAsNodeProcess.min} ms`,
+    }]
+  }
+  console.table(measurementsToTable(electronUtilityProcessMeasurement, electronAsNodeProcessMeasurement));
+  console.log(`electronAsNodeProcessMeasurement: mean ${electronAsNodeProcessMeasurement.mean} ms, std ${electronAsNodeProcessMeasurement.standardDeviation} ms, margin of error ${electronAsNodeProcessMeasurement.marginOfError} ms`);
   process.exit(0);
 }
 
