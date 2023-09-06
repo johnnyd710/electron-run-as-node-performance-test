@@ -70,14 +70,12 @@ async function main() {
       "": "electronUtilityProcess",
       "mean": `${electronUtilityProcess.mean} ms`,
       "std": `${electronUtilityProcess.standardDeviation} ms`,
-      "margin of error": `${electronUtilityProcess.marginOfError} ms`,
       "max": `${electronUtilityProcess.max} ms`,
       "min": `${electronUtilityProcess.min} ms`,
     }, {
       "": "electronAsNodeProcess",
       "mean": `${electronAsNodeProcess.mean} ms`,
       "std": `${electronAsNodeProcess.standardDeviation} ms`,
-      "margin of error": `${electronAsNodeProcess.marginOfError} ms`,
       "max": `${electronAsNodeProcess.max} ms`,
       "min": `${electronAsNodeProcess.min} ms`,
     }]
