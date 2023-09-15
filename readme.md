@@ -1,4 +1,3 @@
-![Results](image.png)
 ![Results](image-1.png)
 
 Explanation:
