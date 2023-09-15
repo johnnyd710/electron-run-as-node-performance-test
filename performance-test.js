@@ -21,7 +21,8 @@ server.listen(socketPath);
  */
 let child_process;
 
-const resolveOnDone = (server) => new Promise((resolve) => {
+// a promise that resolves when the server receives "done" message from a socket
+const resolveOnDone = (server) => new Promise((resolve, reject) => {
   server.on("connection", (socket) => {
     socket.on("data", (data) => {
       if (data.toString() === "done") {
@@ -33,34 +34,31 @@ const resolveOnDone = (server) => new Promise((resolve) => {
   setTimeout(() => reject("timeout"), 5_000);
 });
 
+
 const afterEach = () => {
   server.removeAllListeners("connection");
   child_process?.kill();
   child_process = undefined;
 }
 
-const electronUtilityProcess = new Promise((resolve, reject) => {
-  resolveOnDone(server).then(resolve);
-  childProcess = spawn("./node_modules/electron/dist/electron.exe", ["index.js"]);
-});
-
-const electronAsNodeProcess = new Promise((resolve, reject) => {
-  resolveOnDone(server).then(resolve);
-  childProcess = spawn("./node_modules/electron/dist/electron.exe", ["backend.js"], {
-    env: {
-      ELECTRON_RUN_AS_NODE: 1,
-    }
-  });
-});
-
 async function main() {
   const electronUtilityProcessMeasurement = await measure(async () => {
-    await electronUtilityProcess;
+    await new Promise((resolve, reject) => {
+      resolveOnDone(server).then(resolve);
+      childProcess = spawn("./node_modules/electron/dist/electron.exe", ["index.js"]);
+    });
   }, { afterEach }
 );
 
   const electronAsNodeProcessMeasurement = await measure(async () => {
-    await electronAsNodeProcess;
+    await new Promise((resolve, reject) => {
+      resolveOnDone(server).then(resolve);
+      childProcess = spawn("./node_modules/electron/dist/electron.exe", ["backend.js"], {
+        env: {
+          ELECTRON_RUN_AS_NODE: 1,
+        }
+      });
+    });
   }, { afterEach }
 );
 
